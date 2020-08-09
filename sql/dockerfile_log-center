@@ -1,0 +1,4 @@
+FROM mysql:5.7.26
+ADD log-center-my.cnf /etc/mysql/conf.d/my.cnf
+ADD 05.log-center.sql /docker-entrypoint-initdb.d/05.log-center.sql
+EXPOSE 3306

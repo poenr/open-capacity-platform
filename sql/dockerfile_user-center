@@ -1,0 +1,4 @@
+FROM mysql:5.7.26
+ADD user-center-my.cnf /etc/mysql/conf.d/my.cnf
+ADD 01.user-center.sql /docker-entrypoint-initdb.d/01.user-center.sql
+EXPOSE 3306

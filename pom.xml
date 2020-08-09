@@ -52,8 +52,8 @@
 		<disruptor.version>3.4.1</disruptor.version>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
-		<docker.host>http://59.110.164.254:5555</docker.host>
-		<docker.image.prefix>owenwangwen</docker.image.prefix>
+		<docker.host>unix:///var/run/docker.sock</docker.host>
+		<docker.image.prefix>registry.apps.k8s.software.dc/ljgk</docker.image.prefix>
 		<spring-boot.version>2.1.16.RELEASE</spring-boot.version>
 		<spring-platform.version>Cairo-SR3</spring-platform.version>
 		<spring.social.version>1.1.6.RELEASE</spring.social.version>

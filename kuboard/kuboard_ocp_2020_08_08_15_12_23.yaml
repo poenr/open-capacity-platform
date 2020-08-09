@@ -1,0 +1,891 @@
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  namespace: ocp
+  name: cloud-eureka
+  annotations:
+    k8s.kuboard.cn/workload: cloud-eureka
+    k8s.eip.work/displayName: 服务注册中心
+    k8s.eip.work/ingress: 'true'
+    k8s.eip.work/service: NodePort
+    k8s.eip.work/workload: cloud-eureka
+    k8s.kuboard.cn/ingress: 'true'
+    k8s.kuboard.cn/service: NodePort
+  labels:
+    k8s.eip.work/layer: cloud
+    k8s.eip.work/name: cloud-eureka
+spec:
+  selector:
+    matchLabels:
+      k8s.eip.work/layer: cloud
+      k8s.eip.work/name: cloud-eureka
+  revisionHistoryLimit: 10
+  template:
+    metadata:
+      labels:
+        k8s.eip.work/layer: cloud
+        k8s.eip.work/name: cloud-eureka
+    spec:
+      securityContext:
+        seLinuxOptions: {}
+      imagePullSecrets:
+        - name: ljgkregistry
+      restartPolicy: Always
+      initContainers: []
+      containers:
+        - image: 'registry.apps.k8s.software.dc/ljgk/eureka-server:latest'
+          imagePullPolicy: Always
+          name: eureka-server
+          volumeMounts: []
+          resources:
+            limits:
+            requests:
+          env:
+            - name: eureka.instance.prefer-ip-address
+              value: 'false'
+            - name: eureka.client.service-url.defaultZone
+              value: >-
+                http://cloud-eureka-0.cloud-eureka.ocp.svc.cluster.local:1111/eureka,http://cloud-eureka-1.cloud-eureka.ocp.svc.cluster.local:1111/eureka,http://cloud-eureka-2.cloud-eureka.ocp.svc.cluster.local:1111/eureka
+          lifecycle: {}
+      volumes: []
+      dnsPolicy: ClusterFirst
+      dnsConfig: {}
+      terminationGracePeriodSeconds: 30
+  replicas: 3
+  volumeClaimTemplates: []
+  serviceName: cloud-eureka
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: ocp
+  name: cloud-eureka
+  annotations:
+    k8s.kuboard.cn/workload: cloud-eureka
+    k8s.eip.work/displayName: 服务注册中心
+    k8s.eip.work/workload: cloud-eureka
+  labels:
+    k8s.eip.work/layer: cloud
+    k8s.eip.work/name: cloud-eureka
+spec:
+  selector:
+    k8s.eip.work/layer: cloud
+    k8s.eip.work/name: cloud-eureka
+  type: NodePort
+  ports:
+    - port: 1111
+      targetPort: 1111
+      protocol: TCP
+      name: mpqzwr
+      nodePort: 31111
+  sessionAffinity: None
+
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  namespace: ocp
+  name: cloud-eureka
+  annotations:
+    k8s.kuboard.cn/workload: cloud-eureka
+    k8s.eip.work/displayName: 服务注册中心
+    k8s.eip.work/workload: cloud-eureka
+  labels:
+    k8s.eip.work/layer: cloud
+    k8s.eip.work/name: cloud-eureka
+spec:
+  rules:
+    - host: cloud-eureka.ocp.k8s.software.dc
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: cloud-eureka
+              servicePort: mpqzwr
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  namespace: ocp
+  name: cloud-redis
+  annotations:
+    k8s.kuboard.cn/workload: cloud-redis
+    k8s.kuboard.cn/displayName: Redis缓存
+    k8s.kuboard.cn/ingress: 'false'
+    k8s.kuboard.cn/service: ClusterIP
+  labels:
+    k8s.kuboard.cn/layer: cloud
+    k8s.kuboard.cn/name: cloud-redis
+spec:
+  selector:
+    matchLabels:
+      k8s.kuboard.cn/layer: cloud
+      k8s.kuboard.cn/name: cloud-redis
+  revisionHistoryLimit: 10
+  template:
+    metadata:
+      labels:
+        k8s.kuboard.cn/layer: cloud
+        k8s.kuboard.cn/name: cloud-redis
+    spec:
+      securityContext:
+        seLinuxOptions: {}
+      imagePullSecrets:
+        - name: ljgkregistry
+      restartPolicy: Always
+      initContainers: []
+      containers:
+        - image: 'registry.apps.k8s.software.dc/ljgk/redis:4.0.14'
+          imagePullPolicy: Always
+          name: redis
+          volumeMounts: []
+          resources:
+            limits:
+            requests:
+          env: []
+          lifecycle: {}
+      volumes: []
+      dnsPolicy: ClusterFirst
+      dnsConfig: {}
+      terminationGracePeriodSeconds: 30
+  replicas: 1
+  volumeClaimTemplates: []
+  serviceName: cloud-redis
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: ocp
+  name: cloud-redis
+  annotations:
+    k8s.kuboard.cn/workload: cloud-redis
+    k8s.kuboard.cn/displayName: Redis缓存
+  labels:
+    k8s.kuboard.cn/layer: cloud
+    k8s.kuboard.cn/name: cloud-redis
+spec:
+  selector:
+    k8s.kuboard.cn/layer: cloud
+    k8s.kuboard.cn/name: cloud-redis
+  type: ClusterIP
+  ports:
+    - port: 6379
+      targetPort: 6379
+      protocol: TCP
+      name: 8pz2c3
+      nodePort: 0
+  sessionAffinity: None
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  namespace: ocp
+  name: db-auth-center
+  annotations:
+    k8s.kuboard.cn/workload: db-auth-center
+    k8s.eip.work/displayName: 认证中心数据库
+    k8s.eip.work/ingress: 'false'
+    k8s.eip.work/service: ClusterIP
+    k8s.eip.work/workload: db-auth-center
+    k8s.kuboard.cn/ingress: 'false'
+    k8s.kuboard.cn/service: ClusterIP
+  labels:
+    k8s.eip.work/layer: db
+    k8s.eip.work/name: db-auth-center
+spec:
+  selector:
+    matchLabels:
+      k8s.eip.work/layer: db
+      k8s.eip.work/name: db-auth-center
+  revisionHistoryLimit: 10
+  template:
+    metadata:
+      labels:
+        k8s.eip.work/layer: db
+        k8s.eip.work/name: db-auth-center
+    spec:
+      securityContext:
+        seLinuxOptions: {}
+      imagePullSecrets:
+        - name: ljgkregistry
+      restartPolicy: Always
+      initContainers: []
+      containers:
+        - image: 'registry.apps.k8s.software.dc/ljgk/auth-center-mysql:latest'
+          imagePullPolicy: Always
+          name: auth-center-mysql
+          volumeMounts: []
+          resources:
+            limits:
+            requests:
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              value: root
+          lifecycle: {}
+      volumes: []
+      dnsPolicy: ClusterFirst
+      dnsConfig: {}
+      terminationGracePeriodSeconds: 30
+  replicas: 1
+  volumeClaimTemplates: []
+  serviceName: db-auth-center
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: ocp
+  name: db-auth-center
+  annotations:
+    k8s.kuboard.cn/workload: db-auth-center
+    k8s.eip.work/displayName: 认证中心数据库
+    k8s.eip.work/workload: db-auth-center
+  labels:
+    k8s.eip.work/layer: db
+    k8s.eip.work/name: db-auth-center
+spec:
+  selector:
+    k8s.eip.work/layer: db
+    k8s.eip.work/name: db-auth-center
+  type: ClusterIP
+  ports:
+    - port: 3306
+      targetPort: 3306
+      protocol: TCP
+      name: hzib57
+      nodePort: 0
+  sessionAffinity: None
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  namespace: ocp
+  name: db-log-center
+  annotations:
+    k8s.kuboard.cn/workload: db-log-center
+    k8s.eip.work/displayName: 日志中心数据库
+    k8s.eip.work/ingress: 'false'
+    k8s.eip.work/service: ClusterIP
+    k8s.eip.work/workload: db-log-center
+    k8s.kuboard.cn/ingress: 'false'
+    k8s.kuboard.cn/service: ClusterIP
+  labels:
+    k8s.eip.work/layer: db
+    k8s.eip.work/name: db-log-center
+spec:
+  selector:
+    matchLabels:
+      k8s.eip.work/layer: db
+      k8s.eip.work/name: db-log-center
+  revisionHistoryLimit: 10
+  template:
+    metadata:
+      labels:
+        k8s.eip.work/layer: db
+        k8s.eip.work/name: db-log-center
+    spec:
+      securityContext:
+        seLinuxOptions: {}
+      imagePullSecrets:
+        - name: ljgkregistry
+      restartPolicy: Always
+      initContainers: []
+      containers:
+        - image: 'registry.apps.k8s.software.dc/ljgk/log-center-mysql:latest'
+          imagePullPolicy: Always
+          name: log-center-mysql
+          volumeMounts: []
+          resources:
+            limits:
+            requests:
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              value: root
+          lifecycle: {}
+      volumes: []
+      dnsPolicy: ClusterFirst
+      dnsConfig: {}
+      terminationGracePeriodSeconds: 30
+  replicas: 1
+  volumeClaimTemplates: []
+  serviceName: db-log-center
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: ocp
+  name: db-log-center
+  annotations:
+    k8s.kuboard.cn/workload: db-log-center
+    k8s.eip.work/displayName: 日志中心数据库
+    k8s.eip.work/workload: db-log-center
+  labels:
+    k8s.eip.work/layer: db
+    k8s.eip.work/name: db-log-center
+spec:
+  selector:
+    k8s.eip.work/layer: db
+    k8s.eip.work/name: db-log-center
+  type: ClusterIP
+  ports:
+    - port: 3306
+      targetPort: 3306
+      protocol: TCP
+      name: 4zep27
+      nodePort: 0
+  sessionAffinity: None
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  namespace: ocp
+  name: db-user-center
+  annotations:
+    k8s.kuboard.cn/workload: db-user-center
+    k8s.eip.work/displayName: 用户中心数据库
+    k8s.eip.work/ingress: 'false'
+    k8s.eip.work/service: ClusterIP
+    k8s.eip.work/workload: db-user-center
+    k8s.kuboard.cn/ingress: 'false'
+    k8s.kuboard.cn/service: ClusterIP
+  labels:
+    k8s.eip.work/layer: db
+    k8s.eip.work/name: db-user-center
+spec:
+  selector:
+    matchLabels:
+      k8s.eip.work/layer: db
+      k8s.eip.work/name: db-user-center
+  revisionHistoryLimit: 10
+  template:
+    metadata:
+      labels:
+        k8s.eip.work/layer: db
+        k8s.eip.work/name: db-user-center
+    spec:
+      securityContext:
+        seLinuxOptions: {}
+      imagePullSecrets:
+        - name: ljgkregistry
+      restartPolicy: Always
+      initContainers: []
+      containers:
+        - image: 'registry.apps.k8s.software.dc/ljgk/user-center-mysql:latest'
+          imagePullPolicy: Always
+          name: user-center-mysql
+          volumeMounts: []
+          resources:
+            limits:
+            requests:
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              value: root
+          lifecycle: {}
+      volumes: []
+      dnsPolicy: ClusterFirst
+      dnsConfig: {}
+      terminationGracePeriodSeconds: 30
+  replicas: 1
+  volumeClaimTemplates: []
+  serviceName: db-user-center
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: ocp
+  name: db-user-center
+  annotations:
+    k8s.kuboard.cn/workload: db-user-center
+    k8s.eip.work/displayName: 用户中心数据库
+    k8s.eip.work/workload: db-user-center
+  labels:
+    k8s.eip.work/layer: db
+    k8s.eip.work/name: db-user-center
+spec:
+  selector:
+    k8s.eip.work/layer: db
+    k8s.eip.work/name: db-user-center
+  type: ClusterIP
+  ports:
+    - port: 3306
+      targetPort: 3306
+      protocol: TCP
+      name: 2m2tyy
+      nodePort: 0
+  sessionAffinity: None
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: ocp
+  name: gateway-api
+  annotations:
+    k8s.kuboard.cn/workload: gateway-api
+    deployment.kubernetes.io/revision: '2'
+    k8s.eip.work/displayName: 接口网关
+    k8s.eip.work/ingress: 'true'
+    k8s.eip.work/service: ClusterIP
+    k8s.eip.work/workload: gateway-api
+    k8s.kuboard.cn/ingress: 'true'
+    k8s.kuboard.cn/service: ClusterIP
+  labels:
+    k8s.eip.work/layer: gateway
+    k8s.eip.work/name: gateway-api
+spec:
+  selector:
+    matchLabels:
+      k8s.eip.work/layer: gateway
+      k8s.eip.work/name: gateway-api
+  revisionHistoryLimit: 10
+  template:
+    metadata:
+      labels:
+        k8s.eip.work/layer: gateway
+        k8s.eip.work/name: gateway-api
+    spec:
+      securityContext:
+        seLinuxOptions: {}
+      imagePullSecrets:
+        - name: ljgkregistry
+      restartPolicy: Always
+      initContainers: []
+      containers:
+        - image: 'registry.apps.k8s.software.dc/ljgk/api-gateway:latest'
+          imagePullPolicy: Always
+          name: api-gateway
+          volumeMounts: []
+          resources:
+            limits:
+            requests:
+          env:
+            - name: spring.datasource.druid.url
+              value: >-
+                jdbc:mysql://db-auth-center:3306/oauth-center?useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true&useSSL=false
+            - name: eureka.client.service-url.defaultZone
+              value: >-
+                http://cloud-eureka-0.cloud-eureka.ocp.svc.cluster.local:1111/eureka,http://cloud-eureka-1.cloud-eureka.ocp.svc.cluster.local:1111/eureka,http://cloud-eureka-2.cloud-eureka.ocp.svc.cluster.local:1111/eureka
+            - name: spring.datasource.druid.log.url
+              value: >-
+                jdbc:mysql://db-log-center:3306/log-center?useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true&useSSL=false
+            - name: spring.redis.host
+              value: cloud-redis
+          lifecycle: {}
+      volumes: []
+      dnsPolicy: ClusterFirst
+      dnsConfig: {}
+      terminationGracePeriodSeconds: 30
+  progressDeadlineSeconds: 600
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 25%
+      maxSurge: 25%
+  replicas: 1
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: ocp
+  name: gateway-api
+  annotations:
+    k8s.kuboard.cn/workload: gateway-api
+    k8s.eip.work/displayName: 接口网关
+    k8s.eip.work/workload: gateway-api
+  labels:
+    k8s.eip.work/layer: gateway
+    k8s.eip.work/name: gateway-api
+spec:
+  selector:
+    k8s.eip.work/layer: gateway
+    k8s.eip.work/name: gateway-api
+  type: ClusterIP
+  ports:
+    - port: 9200
+      targetPort: 9200
+      protocol: TCP
+      name: zmcdbh
+      nodePort: 0
+  sessionAffinity: None
+
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  namespace: ocp
+  name: gateway-api
+  annotations:
+    k8s.kuboard.cn/workload: gateway-api
+    k8s.eip.work/displayName: 接口网关
+    k8s.eip.work/workload: gateway-api
+  labels:
+    k8s.eip.work/layer: gateway
+    k8s.eip.work/name: gateway-api
+spec:
+  rules:
+    - host: api-gateway.ocp.k8s.software.dc
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: gateway-api
+              servicePort: zmcdbh
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: ocp
+  name: svc-auth-server
+  annotations:
+    k8s.kuboard.cn/workload: svc-auth-server
+    deployment.kubernetes.io/revision: '2'
+    k8s.eip.work/displayName: 认证中心
+    k8s.eip.work/ingress: 'true'
+    k8s.eip.work/service: ClusterIP
+    k8s.eip.work/workload: svc-auth-server
+    k8s.kuboard.cn/ingress: 'true'
+    k8s.kuboard.cn/service: ClusterIP
+  labels:
+    k8s.eip.work/layer: svc
+    k8s.eip.work/name: svc-auth-server
+spec:
+  selector:
+    matchLabels:
+      k8s.eip.work/layer: svc
+      k8s.eip.work/name: svc-auth-server
+  revisionHistoryLimit: 10
+  template:
+    metadata:
+      labels:
+        k8s.eip.work/layer: svc
+        k8s.eip.work/name: svc-auth-server
+    spec:
+      securityContext:
+        seLinuxOptions: {}
+      imagePullSecrets:
+        - name: ljgkregistry
+      restartPolicy: Always
+      initContainers: []
+      containers:
+        - image: 'registry.apps.k8s.software.dc/ljgk/auth-server:latest'
+          imagePullPolicy: Always
+          name: auth-server
+          volumeMounts: []
+          resources:
+            limits:
+            requests:
+          env:
+            - name: spring.datasource.url
+              value: >-
+                jdbc:mysql://db-auth-center:3306/oauth-center?useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true&useSSL=false
+            - name: eureka.client.service-url.defaultZone
+              value: >-
+                http://cloud-eureka-0.cloud-eureka.ocp.svc.cluster.local:1111/eureka,http://cloud-eureka-1.cloud-eureka.ocp.svc.cluster.local:1111/eureka,http://cloud-eureka-2.cloud-eureka.ocp.svc.cluster.local:1111/eureka
+            - name: spring.datasource.druid.log.url
+              value: >-
+                jdbc:mysql://db-log-center:3306/log-center?useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true&useSSL=false
+            - name: spring.redis.host
+              value: cloud-redis
+          lifecycle: {}
+      volumes: []
+      dnsPolicy: ClusterFirst
+      dnsConfig: {}
+      terminationGracePeriodSeconds: 30
+  progressDeadlineSeconds: 600
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 25%
+      maxSurge: 25%
+  replicas: 1
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: ocp
+  name: svc-auth-server
+  annotations:
+    k8s.kuboard.cn/workload: svc-auth-server
+    k8s.eip.work/displayName: 认证中心
+    k8s.eip.work/workload: svc-auth-server
+  labels:
+    k8s.eip.work/layer: svc
+    k8s.eip.work/name: svc-auth-server
+spec:
+  selector:
+    k8s.eip.work/layer: svc
+    k8s.eip.work/name: svc-auth-server
+  type: ClusterIP
+  ports:
+    - port: 8000
+      targetPort: 8000
+      protocol: TCP
+      name: dzprby
+      nodePort: 0
+  sessionAffinity: None
+
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  namespace: ocp
+  name: svc-auth-server
+  annotations:
+    k8s.kuboard.cn/workload: svc-auth-server
+    k8s.eip.work/displayName: 认证中心
+    k8s.eip.work/workload: svc-auth-server
+  labels:
+    k8s.eip.work/layer: svc
+    k8s.eip.work/name: svc-auth-server
+spec:
+  rules:
+    - host: svc-auth-server.ocp.k8s.software.dc
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: svc-auth-server
+              servicePort: dzprby
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: ocp
+  name: svc-user-center
+  annotations:
+    k8s.kuboard.cn/workload: svc-user-center
+    deployment.kubernetes.io/revision: '2'
+    k8s.eip.work/displayName: 用户中心
+    k8s.eip.work/ingress: 'true'
+    k8s.eip.work/service: ClusterIP
+    k8s.eip.work/workload: svc-user-center
+    k8s.kuboard.cn/ingress: 'true'
+    k8s.kuboard.cn/service: ClusterIP
+  labels:
+    k8s.eip.work/layer: svc
+    k8s.eip.work/name: svc-user-center
+spec:
+  selector:
+    matchLabels:
+      k8s.eip.work/layer: svc
+      k8s.eip.work/name: svc-user-center
+  revisionHistoryLimit: 10
+  template:
+    metadata:
+      labels:
+        k8s.eip.work/layer: svc
+        k8s.eip.work/name: svc-user-center
+    spec:
+      securityContext:
+        seLinuxOptions: {}
+      imagePullSecrets:
+        - name: ljgkregistry
+      restartPolicy: Always
+      initContainers: []
+      containers:
+        - image: 'registry.apps.k8s.software.dc/ljgk/user-center:latest'
+          imagePullPolicy: Always
+          name: user-center
+          volumeMounts: []
+          resources:
+            limits:
+            requests:
+          env:
+            - name: spring.datasource.url
+              value: >-
+                jdbc:mysql://db-user-center:3306/user-center?useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true&useSSL=false
+            - name: spring.datasource.druid.log.url
+              value: >-
+                jdbc:mysql://db-log-center:3306/log-center?useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true&useSSL=false
+            - name: spring.redis.host
+              value: cloud-redis
+            - name: eureka.client.serviceUrl.defaultZone
+              value: >-
+                http://cloud-eureka-0.cloud-eureka.ocp.svc.cluster.local:1111/eureka,http://cloud-eureka-1.cloud-eureka.ocp.svc.cluster.local:1111/eureka,http://cloud-eureka-2.cloud-eureka.ocp.svc.cluster.local:1111/eureka
+          lifecycle: {}
+      volumes: []
+      dnsPolicy: ClusterFirst
+      dnsConfig: {}
+      terminationGracePeriodSeconds: 30
+  progressDeadlineSeconds: 600
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 25%
+      maxSurge: 25%
+  replicas: 1
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: ocp
+  name: svc-user-center
+  annotations:
+    k8s.kuboard.cn/workload: svc-user-center
+    k8s.eip.work/displayName: 用户中心
+    k8s.eip.work/workload: svc-user-center
+  labels:
+    k8s.eip.work/layer: svc
+    k8s.eip.work/name: svc-user-center
+spec:
+  selector:
+    k8s.eip.work/layer: svc
+    k8s.eip.work/name: svc-user-center
+  type: ClusterIP
+  ports:
+    - port: 7000
+      targetPort: 7000
+      protocol: TCP
+      name: jhaxwk
+      nodePort: 0
+  sessionAffinity: None
+
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  namespace: ocp
+  name: svc-user-center
+  annotations:
+    k8s.kuboard.cn/workload: svc-user-center
+    k8s.eip.work/displayName: 用户中心
+    k8s.eip.work/workload: svc-user-center
+  labels:
+    k8s.eip.work/layer: svc
+    k8s.eip.work/name: svc-user-center
+spec:
+  rules:
+    - host: svc-user-center.ocp.k8s.software.dc
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: svc-user-center
+              servicePort: jhaxwk
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: ocp
+  name: web-back-center
+  annotations:
+    k8s.kuboard.cn/workload: web-back-center
+    deployment.kubernetes.io/revision: '1'
+    k8s.eip.work/displayName: 后台中心
+    k8s.eip.work/ingress: 'true'
+    k8s.eip.work/service: ClusterIP
+    k8s.eip.work/workload: web-back-center
+    k8s.kuboard.cn/ingress: 'true'
+    k8s.kuboard.cn/service: ClusterIP
+  labels:
+    k8s.eip.work/layer: web
+    k8s.eip.work/name: web-back-center
+spec:
+  selector:
+    matchLabels:
+      k8s.eip.work/layer: web
+      k8s.eip.work/name: web-back-center
+  revisionHistoryLimit: 10
+  template:
+    metadata:
+      labels:
+        k8s.eip.work/layer: web
+        k8s.eip.work/name: web-back-center
+    spec:
+      securityContext:
+        seLinuxOptions: {}
+      imagePullSecrets:
+        - name: ljgkregistry
+      restartPolicy: Always
+      initContainers: []
+      containers:
+        - image: 'registry.apps.k8s.software.dc/ljgk/back-center:latest'
+          imagePullPolicy: Always
+          name: back-center
+          volumeMounts: []
+          resources:
+            limits:
+            requests:
+          env:
+            - name: GATEWAY_API_URL
+              value: 'http://api-gateway.ocp.k8s.software.dc/'
+            - name: CLOUD_EUREKA_URL
+              value: 'http://cloud-eureka.ocp.k8s.software.dc/'
+          lifecycle: {}
+      volumes: []
+      dnsPolicy: ClusterFirst
+      dnsConfig: {}
+      terminationGracePeriodSeconds: 30
+  progressDeadlineSeconds: 600
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 25%
+      maxSurge: 25%
+  replicas: 1
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: ocp
+  name: web-back-center
+  annotations:
+    k8s.kuboard.cn/workload: web-back-center
+    k8s.eip.work/displayName: 后台中心
+    k8s.eip.work/workload: web-back-center
+  labels:
+    k8s.eip.work/layer: web
+    k8s.eip.work/name: web-back-center
+spec:
+  selector:
+    k8s.eip.work/layer: web
+    k8s.eip.work/name: web-back-center
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 80
+      protocol: TCP
+      name: rxcrxf
+      nodePort: 0
+  sessionAffinity: None
+
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  namespace: ocp
+  name: web-back-center
+  annotations:
+    k8s.kuboard.cn/workload: web-back-center
+    k8s.eip.work/displayName: 后台中心
+    k8s.eip.work/workload: web-back-center
+  labels:
+    k8s.eip.work/layer: web
+    k8s.eip.work/name: web-back-center
+spec:
+  rules:
+    - host: back-center.ocp.k8s.software.dc
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: web-back-center
+              servicePort: rxcrxf
+
