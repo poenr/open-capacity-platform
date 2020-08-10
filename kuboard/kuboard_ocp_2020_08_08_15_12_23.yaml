@@ -35,7 +35,7 @@ spec:
       restartPolicy: Always
       initContainers: []
       containers:
-        - image: 'registry.apps.k8s.software.dc/ljgk/eureka-server:latest'
+        - image: 'registry.cn-hangzhou.aliyuncs.com/pihui/aliyun/ljgk/eureka-server:latest'
           imagePullPolicy: Always
           name: eureka-server
           volumeMounts: []
@@ -139,7 +139,7 @@ spec:
       restartPolicy: Always
       initContainers: []
       containers:
-        - image: 'registry.apps.k8s.software.dc/ljgk/redis:4.0.14'
+        - image: 'registry.cn-hangzhou.aliyuncs.com/pihui/aliyun/ljgk/redis:4.0.14'
           imagePullPolicy: Always
           name: redis
           volumeMounts: []
@@ -217,7 +217,7 @@ spec:
       restartPolicy: Always
       initContainers: []
       containers:
-        - image: 'registry.apps.k8s.software.dc/ljgk/auth-center-mysql:latest'
+        - image: 'registry.cn-hangzhou.aliyuncs.com/pihui/aliyun/ljgk/auth-center-mysql:latest'
           imagePullPolicy: Always
           name: auth-center-mysql
           volumeMounts: []
@@ -298,7 +298,7 @@ spec:
       restartPolicy: Always
       initContainers: []
       containers:
-        - image: 'registry.apps.k8s.software.dc/ljgk/log-center-mysql:latest'
+        - image: 'registry.cn-hangzhou.aliyuncs.com/pihui/aliyun/ljgk/log-center-mysql:latest'
           imagePullPolicy: Always
           name: log-center-mysql
           volumeMounts: []
@@ -379,7 +379,7 @@ spec:
       restartPolicy: Always
       initContainers: []
       containers:
-        - image: 'registry.apps.k8s.software.dc/ljgk/user-center-mysql:latest'
+        - image: 'registry.cn-hangzhou.aliyuncs.com/pihui/aliyun/ljgk/user-center-mysql:latest'
           imagePullPolicy: Always
           name: user-center-mysql
           volumeMounts: []
@@ -461,7 +461,7 @@ spec:
       restartPolicy: Always
       initContainers: []
       containers:
-        - image: 'registry.apps.k8s.software.dc/ljgk/api-gateway:latest'
+        - image: 'registry.cn-hangzhou.aliyuncs.com/pihui/aliyun/ljgk/api-gateway:latest'
           imagePullPolicy: Always
           name: api-gateway
           volumeMounts: []
@@ -579,7 +579,7 @@ spec:
       restartPolicy: Always
       initContainers: []
       containers:
-        - image: 'registry.apps.k8s.software.dc/ljgk/auth-server:latest'
+        - image: 'registry.cn-hangzhou.aliyuncs.com/pihui/aliyun/ljgk/auth-server:latest'
           imagePullPolicy: Always
           name: auth-server
           volumeMounts: []
@@ -697,7 +697,7 @@ spec:
       restartPolicy: Always
       initContainers: []
       containers:
-        - image: 'registry.apps.k8s.software.dc/ljgk/user-center:latest'
+        - image: 'registry.cn-hangzhou.aliyuncs.com/pihui/aliyun/ljgk/user-center:latest'
           imagePullPolicy: Always
           name: user-center
           volumeMounts: []
@@ -815,7 +815,7 @@ spec:
       restartPolicy: Always
       initContainers: []
       containers:
-        - image: 'registry.apps.k8s.software.dc/ljgk/back-center:latest'
+        - image: 'registry.cn-hangzhou.aliyuncs.com/pihui/aliyun/ljgk/back-center:latest'
           imagePullPolicy: Always
           name: back-center
           volumeMounts: []
